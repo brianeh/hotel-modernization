@@ -10,10 +10,10 @@ DB_PASS="${MYSQL_PASSWORD:-root}"  # Use env var or default
 OUTPUT_DIR="data"
 OUTPUT_FILE="${OUTPUT_DIR}/mysql_dump.sql"
 
-# Validate directory exists
+# Create output directory if it doesn't exist
 if [ ! -d "$OUTPUT_DIR" ]; then
-    echo "Error: Directory $OUTPUT_DIR does not exist"
-    exit 1
+    echo "Creating output directory: $OUTPUT_DIR"
+    mkdir -p "$OUTPUT_DIR"
 fi
 
 # Check if mysqldump is available
