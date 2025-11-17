@@ -345,7 +345,7 @@ src/
 
 ## Phase 4: Spring Boot Backend 📋
 
-**Repository:** [hotel-demo-springboot](https://github.com/brianeh/hotel-demo-springboot)
+**Repository:** [hotel-api-springboot](https://github.com/brianeh/hotel-api-springboot)
 
 **Status:** 📋 Planned
 
@@ -405,7 +405,7 @@ Modern Spring Boot REST API with embedded server and reactive features.
 
 ## Phase 5: Serverless Backend 📋
 
-**Repository:** [hotel-demo-serverless](https://github.com/brianeh/hotel-demo-serverless)
+**Repository:** [hotel-api-serverless](https://github.com/brianeh/hotel-api-serverless)
 
 **Status:** 📋 Planned
 
@@ -466,7 +466,7 @@ Fully serverless architecture with AWS Lambda functions, API Gateway, and manage
 
 ## Phase 6: Microservices Architecture 📋
 
-**Repository:** [hotel-demo-microservices](https://github.com/brianeh/hotel-demo-microservices)
+**Repository:** [hotel-api-microservices](https://github.com/brianeh/hotel-api-microservices)
 
 **Status:** 📋 Planned
 

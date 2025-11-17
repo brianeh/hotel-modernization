@@ -19,9 +19,9 @@ This project is phase 3 in a multi-step demonstration that highlights a few diff
 
 Phase 1: [hotel-monolith](https://www.github.com/brianeh/hotel-monolith) (Legacy application running in a devcontainer)
 
-Phase 2: [hotel-demo-restful](https://www.github.com/brianeh/hotel-demo-restful) (New REST API on top of existing persistence layer)
+Phase 2: [hotel-api-restful](https://www.github.com/brianeh/hotel-api-restful) (New REST API on top of existing persistence layer)
 
-Phase 3: [hotel-demo-react](https://www.github.com/brianeh/hotel-demo-react) (Decoupled user interface - this project)
+Phase 3: [hotel-ui-react](https://www.github.com/brianeh/hotel-ui-react) (Decoupled user interface - this project)
 
 ## Overview
 
@@ -52,7 +52,7 @@ This is a full-featured React Single Page Application (SPA) for hotel room reser
 
 - Node.js 20+ (provided via DevContainer)
 - Backend running at `http://localhost:8080`
-  - Hotel Reservation Demo - Phase 2 (**RESTful API**) - [hotel-demo-restful](https://www.github.com/brianeh/hotel-demo-restful)
+  - Hotel Reservation Demo - Phase 2 (**RESTful API**) - [hotel-api-restful](https://www.github.com/brianeh/hotel-api-restful)
 - The Vite dev server is configured to proxy API requests to the backend
 
 ## Quick Start
@@ -73,7 +73,7 @@ npm run dev
 ### Without DevContainer
 
 ```bash
-cd hotel-demo-react
+cd hotel-ui-react
 npm install
 npm run dev
 ```
@@ -83,7 +83,7 @@ npm run dev
 ## Project Structure
 
 ```
-hotel-demo-react/
+hotel-ui-react/
 ├── src/
 │   ├── components/
 │   │   ├── HomePage.tsx              # Home page with date selection
@@ -243,7 +243,7 @@ VITE_API_URL=https://api.yourdomain.com/HotelReservation-war
 ### Start Backend (Terminal 1)
 
 ```bash
-cd ../hotel-demo-restful
+cd ../hotel-api-restful
 ./status.sh    # Check services
 ./deploy.sh    # Deploy backend
 ```
@@ -251,7 +251,7 @@ cd ../hotel-demo-restful
 ### Start Frontend (Terminal 2)
 
 ```bash
-cd hotel-demo-react
+cd hotel-ui-react
 npm run dev    # Start Vite dev server
 ```
 

@@ -16,9 +16,9 @@ hotel-modernization/
 ├── hotel-api-rest/             ✅ Phase 2: RESTful API Layer (Implemented)
 ├── hotel-ui-react/             ✅ Phase 3: React SPA Frontend (Implemented)
 ├── hotel-db-postgres/          ✅ Phase 3.5: PostgreSQL Database (Implemented)
-├── hotel-demo-springboot/      📋 Phase 4: Spring Boot Backend (Planned - external repo)
-├── hotel-demo-serverless/      📋 Phase 5: Serverless Backend (Planned - external repo)
-└── hotel-demo-microservices/   📋 Phase 6: Microservices Architecture (Planned - external repo)
+├── hotel-api-springboot/      📋 Phase 4: Spring Boot Backend (Planned - external repo)
+├── hotel-api-serverless/      📋 Phase 5: Serverless Backend (Planned - external repo)
+└── hotel-api-microservices/   📋 Phase 6: Microservices Architecture (Planned - external repo)
 ```
 
 **Note:** Phases 4-6 are planned and will be implemented in separate repositories. See [MODERNIZATION_ROADMAP.md](./docs/MODERNIZATION_ROADMAP.md) for details.
