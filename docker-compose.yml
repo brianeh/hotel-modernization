@@ -2,6 +2,9 @@ version: '3.8'
 
 services:
   hotel-monolith:
+    profiles:
+      - monolith
+      - all
     build:
       context: ./hotel-monolith
       dockerfile: Dockerfile
@@ -28,8 +31,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    networks:
+      - hotel-shared-network
 
   hotel-api-rest:
+    profiles:
+      - api
+      - all
     build:
       context: ./hotel-api-rest
       dockerfile: Dockerfile
@@ -56,8 +64,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
+    networks:
+      - hotel-shared-network
 
   hotel-ui-react:
+    profiles:
+      - ui
+      - all
     build:
       context: ./hotel-ui-react
       dockerfile: Dockerfile
@@ -74,6 +87,45 @@ services:
     depends_on:
       hotel-api-rest:
         condition: service_healthy
+    networks:
+      - hotel-shared-network
+
+  hotel-db-postgres:
+    profiles:
+      - db
+      - all
+    image: postgres:15-alpine
+    container_name: hotel-postgres-standalone
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: hotel_reservation
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - hotel-db-postgres-data:/var/lib/postgresql/data
+      - ${HOTEL_DB_POSTGRES_PATH:-./hotel-db-postgres}/schema:/docker-entrypoint-initdb.d:ro
+      - ${HOTEL_DB_POSTGRES_PATH:-./hotel-db-postgres}/backups:/backups
+    ports:
+      - "5432:5432"
+    networks:
+      - hotel-shared-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d hotel_reservation"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command:
+      - "postgres"
+      - "-c"
+      - "shared_buffers=256MB"
+      - "-c"
+      - "max_connections=200"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "log_destination=stderr"
 
 volumes:
   hotel-monolith-glassfish-data:
@@ -81,4 +133,12 @@ volumes:
   hotel-api-rest-glassfish-data:
   hotel-api-rest-mysql-data:
   hotel-ui-react-node-modules:
+  hotel-db-postgres-data:
+    name: hotel-db-postgres-data
+    driver: local
+
+networks:
+  hotel-shared-network:
+    name: hotel-shared-network
+    driver: bridge
 
