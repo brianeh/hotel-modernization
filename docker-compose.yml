@@ -35,7 +35,7 @@ services:
   hotel-api-rest:
     profiles:
       - api
-      - ui
+      - ui-rest
       - all
     build:
       context: ./hotel-api-rest
@@ -66,25 +66,102 @@ services:
     networks:
       - hotel-shared-network
 
-  hotel-ui-react:
+  hotel-api-rooms:
     profiles:
-      - ui
+      - springboot
       - all
+    build:
+      context: ./hotel-api-springboot/rooms-service
+      dockerfile: Dockerfile
+    container_name: hotel-api-rooms
+    ports:
+      - "8081:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://hotel-db-postgres:5432/hotel_reservation
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      hotel-db-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - hotel-shared-network
+
+  hotel-api-reservations:
+    profiles:
+      - springboot
+      - all
+    build:
+      context: ./hotel-api-springboot/reservations-service
+      dockerfile: Dockerfile
+    container_name: hotel-api-reservations
+    ports:
+      - "8082:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://hotel-db-postgres:5432/hotel_reservation
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    depends_on:
+      hotel-db-postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - hotel-shared-network
+
+  hotel-ui-react-rest:
+    profiles:
+      - ui-rest
     build:
       context: ./hotel-ui-react
       dockerfile: Dockerfile
-    container_name: hotel-ui-react
+    container_name: hotel-ui-react-rest
     working_dir: /workspaces/hotel-modernization/hotel-ui-react
     ports:
       - "5173:5173"  # Vite dev server
     environment:
       - NODE_ENV=development
-      - VITE_API_URL=http://hotel-api-rest:8080/HotelReservation-war
+      - VITE_ROOMS_API_URL=${VITE_ROOMS_API_URL:-http://hotel-api-rest:8080/HotelReservation-war}
+      - VITE_RESERVATIONS_API_URL=${VITE_RESERVATIONS_API_URL:-http://hotel-api-rest:8080/HotelReservation-war}
     volumes:
       - ${HOTEL_UI_REACT_PATH:-./hotel-ui-react}:/workspaces/hotel-modernization/hotel-ui-react
       - hotel-ui-react-node-modules:/workspaces/hotel-modernization/hotel-ui-react/node_modules
     depends_on:
       hotel-api-rest:
+        condition: service_healthy
+    networks:
+      - hotel-shared-network
+
+  hotel-ui-react-springboot:
+    profiles:
+      - ui-springboot
+    build:
+      context: ./hotel-ui-react
+      dockerfile: Dockerfile
+    container_name: hotel-ui-react-springboot
+    working_dir: /workspaces/hotel-modernization/hotel-ui-react
+    ports:
+      - "5173:5173"  # Vite dev server
+    environment:
+      - NODE_ENV=development
+      - VITE_ROOMS_API_URL=${VITE_ROOMS_API_URL:-http://hotel-api-rooms:8080}
+      - VITE_RESERVATIONS_API_URL=${VITE_RESERVATIONS_API_URL:-http://hotel-api-reservations:8080}
+    volumes:
+      - ${HOTEL_UI_REACT_PATH:-./hotel-ui-react}:/workspaces/hotel-modernization/hotel-ui-react
+      - hotel-ui-react-node-modules:/workspaces/hotel-modernization/hotel-ui-react/node_modules
+    depends_on:
+      hotel-api-rooms:
+        condition: service_healthy
+      hotel-api-reservations:
         condition: service_healthy
     networks:
       - hotel-shared-network

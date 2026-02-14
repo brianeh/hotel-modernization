@@ -4,7 +4,7 @@ An execution-focused plan for evolving the legacy Java EE hotel reservation syst
 
 ## Overview
 
-This roadmap explains what changes in each phase, why those changes matter, and how to proceed: architecture diagrams, technology choices, migration steps, testing and rollout guidance, and links to working repositories. Use it to pick a starting phase, verify prerequisites and exit criteria, align timelines and budgets, and plan cutover/rollback. Pair it with the Decision Framework and Architecture Comparison to finalize scope, sequence, and stakeholder expectations before execution.
+This roadmap explains what changes in each phase, why those changes matter, and how to proceed: architecture diagrams, technology choices, migration steps, testing and rollout guidance, and links to working repositories. Use it to pick a starting phase, verify prerequisites and exit criteria, align timelines and cost levels, and plan cutover/rollback. Pair it with the Decision Framework and Architecture Comparison to finalize scope, sequence, and stakeholder expectations before execution.
 
 **Document Purpose:** This roadmap provides phase-by-phase execution details, code structure, and API summaries. For detailed API specifications with HTTP examples, see [IMPLEMENTATION_DETAILS.md](./IMPLEMENTATION_DETAILS.md). For development setup and troubleshooting, see [DEVCONTAINER_SETUP.md](./DEVCONTAINER_SETUP.md).
 
@@ -343,63 +343,76 @@ src/
 
 ---
 
-## Phase 4: Spring Boot Backend 📋
+## Phase 4: Spring Boot Backend ✅
 
-**Repository:** [hotel-api-springboot](https://github.com/brianeh/hotel-api-springboot)
+**Project:** `hotel-api-springboot`
 
-**Status:** 📋 Planned
+**Status:** ✅ Complete
 
 ### Architecture
 
-Modern Spring Boot REST API with embedded server and reactive features.
+Spring Boot REST API split into two services (rooms and reservations) backed by PostgreSQL.
 
 ```
-[Angular/React SPA] → [Spring Boot REST API] → [PostgreSQL]
-                           ↓
-                      [Spring Security]
+[React SPA] → [Rooms Service] ─┐
+            ├→ [PostgreSQL]
+[React SPA] → [Reservations Service] ┘
 ```
 
 ### Technology Stack
 
-- **Frontend:** Angular or React SPA
-- **Backend:** Spring Boot 3.x (Java 17+)
-- **Database:** PostgreSQL 15 (or Aurora Serverless) - *Note: Phase 3.5 provides PostgreSQL 15 as standalone service*
-- **Security:** Spring Security with JWT
-- **Deployment:** ECS Fargate or EKS
-- **Build Tool:** Maven/Gradle
+- **Frontend:** React SPA (Phase 3)
+- **Backend:** Spring Boot 3.x (Java 17)
+- **Database:** PostgreSQL 15 (Phase 3.5 service)
+- **Deployment:** Docker Compose (local)
+- **Build Tool:** Maven
 
 ### Key Changes from Phase 3
 
-- Modern Spring Boot replacing GlassFish
-- Embedded Tomcat server
-- Spring Security for authentication
-- RESTful API with OpenAPI documentation
-- Modern Maven build system
+- Modern Spring Boot replacing GlassFish for API workloads
+- Two services: `rooms-service` and `reservations-service`
+- PostgreSQL backing store with schema from Phase 3.5
+- Docker Compose profiles for UI + backend selection
 
 ### Spring Components
 
 - `RoomController` - REST endpoints
-- `ReservationController` - Booking management
+- `ReservationController` - Booking management and search
 - `RoomRepository` - Spring Data JPA
 - `ReservationService` - Business logic
-- `SecurityConfig` - Authentication/authorization
 
 ### Business Justification
 
 **Benefits:**
 - Industry-standard framework
-- Large ecosystem and community
-- Easy testing with Spring Test
-- Production-ready features
-- Cloud-native deployment
+- Modern local dev workflow with Compose
+- Decoupled services for rooms and reservations
+- Uses PostgreSQL (aligns with Phase 3.5)
 
 **Trade-offs:**
-- Complete rewrite from legacy
-- Learning curve for teams
-- Full cloud deployment setup
+- Two-service coordination for local dev
+- No auth or gateway in this phase
 
-**Estimated Effort:** 10-12 weeks  
-**Risk Level:** Medium-High
+**Estimated Effort:** 8-10 weeks  
+**Risk Level:** Medium
+
+### Local Development
+
+Start Postgres and Spring Boot services:
+
+```bash
+docker compose --profile db --profile springboot up -d
+```
+
+Run the React UI against Spring Boot:
+
+```bash
+docker compose --profile db --profile springboot --profile ui-springboot up -d
+```
+
+Service URLs:
+- Rooms API: http://localhost:8081/api/rooms
+- Reservations API: http://localhost:8082/api/reservations
 
 ---
 
@@ -540,7 +553,7 @@ Domain-driven microservices with event-driven communication and independent depl
 |----------|--------|------|------|----------|
 | Lift & Shift | 3-4 weeks | Low | Low | Immediate cloud benefits |
 | Frontend Modernization | 6-8 weeks | Medium | Medium | Modern UX, API-first |
-| Full Refactor (Spring Boot) | 10-12 weeks | Medium-High | Medium-High | Modern stack, maintainable |
+| Full Refactor (Spring Boot) | 8-10 weeks | Medium | Medium | Modern stack, maintainable |
 | Serverless | 8-10 weeks | Low-Medium | Medium | Pay-per-use, auto-scale |
 | Microservices | 16+ weeks | High | High | Maximum scalability |
 
@@ -560,6 +573,7 @@ Domain-driven microservices with event-driven communication and independent depl
 - Need industry-standard framework
 - Large team with Spring expertise
 - Long-term maintainability important
+- Want a PostgreSQL-backed Spring Boot implementation available in this repo
 
 **Choose Phase 5 (Serverless)** if:
 - Variable/low traffic workload

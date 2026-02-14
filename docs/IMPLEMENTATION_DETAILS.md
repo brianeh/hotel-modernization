@@ -2,7 +2,7 @@
 
 Comprehensive technical documentation for the implemented phases of the Hotel Reservation System modernization project. This document covers database schema, API specifications, React architecture, build configurations, and deployment details.
 
-**Document Purpose:** This document provides detailed technical reference for developers working on the implemented phases (1-3). It includes complete HTTP API examples, code structure, build commands, and Docker Compose workflows. For phase planning and architecture decisions, see [MODERNIZATION_ROADMAP.md](./MODERNIZATION_ROADMAP.md) and [DECISION_FRAMEWORK.md](./DECISION_FRAMEWORK.md).
+**Document Purpose:** This document provides detailed technical reference for developers working on the implemented phases (1-4). It includes complete HTTP API examples, code structure, build commands, and Docker Compose workflows. For phase planning and architecture decisions, see [MODERNIZATION_ROADMAP.md](./MODERNIZATION_ROADMAP.md) and [DECISION_FRAMEWORK.md](./DECISION_FRAMEWORK.md).
 
 ---
 
@@ -11,8 +11,9 @@ Comprehensive technical documentation for the implemented phases of the Hotel Re
 1. [Database Schema](#database-schema)
 2. [REST API Specifications](#rest-api-specifications)
 3. [React Component Architecture](#react-component-architecture)
-4. [Build and Deployment](#build-and-deployment)
-5. [Development Workflow](#development-workflow)
+4. [Spring Boot Services](#phase-4-spring-boot-services)
+5. [Build and Deployment](#build-and-deployment)
+6. [Development Workflow](#development-workflow)
 
 ---
 
@@ -668,8 +669,13 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0", // Allow access from outside container
     proxy: {
-      "/api": {
-        target: process.env.VITE_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
+      "/api/rooms": {
+        target: process.env.VITE_ROOMS_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+      },
+      "/api/reservations": {
+        target: process.env.VITE_RESERVATIONS_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
@@ -681,7 +687,51 @@ export default defineConfig({
 **Production Deployment (Planned):**
 - Frontend: S3 + CloudFront
 - Backend: EC2/ECS with GlassFish
-- Environment variable: `VITE_API_URL` for production API endpoint
+- Environment variables: `VITE_ROOMS_API_URL` and `VITE_RESERVATIONS_API_URL`
+
+---
+
+## Spring Boot Services
+
+Phase 4 replaces the GlassFish REST API with two Spring Boot services backed by PostgreSQL.
+
+### Services
+
+**rooms-service**
+- Base path: `/api/rooms`
+- Endpoints:
+  - `GET /api/rooms`
+  - `GET /api/rooms/{id}`
+  - `POST /api/rooms`
+  - `PUT /api/rooms/{id}`
+  - `DELETE /api/rooms/{id}`
+
+**reservations-service**
+- Base path: `/api/reservations`
+- Endpoints:
+  - `GET /api/reservations`
+  - `GET /api/reservations/{id}`
+  - `GET /api/reservations/search?checkIn=YYYY-MM-DD&checkOut=YYYY-MM-DD`
+  - `POST /api/reservations`
+  - `PUT /api/reservations/{id}`
+  - `DELETE /api/reservations/{id}`
+
+### Data Mapping Notes
+
+- PostgreSQL schema uses `has_private_bathroom` while the API JSON uses `havePrivateBathroom`.
+- Reservation dates use `yyyy-MM-dd`.
+
+### Service URLs (Docker Compose)
+
+- Rooms API: `http://localhost:8081/api/rooms`
+- Reservations API: `http://localhost:8082/api/reservations`
+
+### UI Integration
+
+- The UI uses relative URLs in development so Vite can proxy `/api/rooms` and `/api/reservations`.
+- Compose profiles:
+  - `ui-rest`: UI + hotel-api-rest
+  - `ui-springboot`: UI + Spring Boot services
 
 ---
 
@@ -762,11 +812,11 @@ docker compose logs -f hotel-api-rest
 # From monorepo root - start API backend first
 docker compose --profile api up -d
 
-# Start React frontend
-docker compose --profile ui up -d
+# Start React frontend (REST backend)
+docker compose --profile ui-rest up -d
 
 # View logs
-docker compose logs -f hotel-ui-react
+docker compose logs -f hotel-ui-react-rest
 ```
 
 **Access Points:**
@@ -790,7 +840,7 @@ docker compose logs -f hotel-ui-react
 **Start All Services:**
 ```bash
 # From monorepo root
-docker compose --profile api --profile ui up -d
+docker compose --profile api --profile ui-rest up -d
 
 # Or start all services
 docker compose --profile all up -d
@@ -803,7 +853,7 @@ docker compose logs -f
 
 # Specific service
 docker compose logs -f hotel-api-rest
-docker compose logs -f hotel-ui-react
+docker compose logs -f hotel-ui-react-rest
 ```
 
 **Stop Services:**
@@ -820,6 +870,22 @@ docker compose --profile all down
 - Backend API: http://localhost:8080/HotelReservation-war/api/rooms
 - Backend UI (JSP): http://localhost:8080/HotelReservation-war/
 - Admin Console (API): http://localhost:4850
+
+### Spring Boot Services
+
+**Start Services:**
+```bash
+# From monorepo root
+docker compose --profile db --profile springboot up -d
+
+# Start React frontend (Spring Boot backend)
+docker compose --profile db --profile springboot --profile ui-springboot up -d
+```
+
+**Access Points:**
+- Frontend: http://localhost:5173
+- Rooms API: http://localhost:8081/api/rooms
+- Reservations API: http://localhost:8082/api/reservations
 
 ### Phase 3.5: PostgreSQL Database
 
@@ -869,6 +935,7 @@ This implementation demonstrates a progressive modernization approach:
 1. **Phase 1 (hotel-monolith):** Traditional Java EE monolith with JSP/Servlet frontend
 2. **Phase 2 (hotel-api-rest):** REST API layer added without disrupting existing functionality
 3. **Phase 3 (hotel-ui-react):** Modern React SPA consuming REST API, fully decoupled from backend
+4. **Phase 4 (hotel-api-springboot):** Spring Boot services for rooms and reservations with PostgreSQL
 
 Each phase builds on the previous one, allowing incremental modernization with minimal risk and maximum flexibility.
 

@@ -1,12 +1,12 @@
 # Sample Decision Framework - Hotel Modernization Architecture
 
-A practical, stakeholder-focused guide to selecting a modernization path for a hotel reservation system. It synthesizes business goals, technical constraints, and organizational readiness into phased architectural options, clarifies key trade-offs, expected timelines, budget ranges, team profiles, and risk, and provides concrete selection criteria to reduce decision ambiguity. All time and cost figures are directional estimates and will vary by context.
+A practical, stakeholder-focused guide to selecting a modernization path for a hotel reservation system. It synthesizes business goals, technical constraints, and organizational readiness into phased architectural options, clarifies key trade-offs, expected timelines, cost levels, team profiles, and risk, and provides concrete selection criteria to reduce decision ambiguity. All time estimates and cost levels are directional and will vary by context.
 
 ## Overview
 
 This framework explains when to choose each of the six modernization phases (from adding a REST API to adopting microservices), how phases compose into recommended migration paths, and what success looks like for each. Use the Quick Selection Guide to shortlist options, the phase deep-dives for capabilities and limitations, the Decision Matrix for side-by-side comparison, and the Success Criteria checklist to finalize acceptance criteria. It is intended for product owners, software architects, and delivery leads planning 2–16+ week modernization efforts and aligning stakeholders on scope, risk, and outcomes before committing.
 
-**Document Purpose:** This framework helps stakeholders make informed decisions about which modernization path to pursue. It focuses on business context, trade-offs, costs, and team requirements. For detailed technical implementation, see [MODERNIZATION_ROADMAP.md](./MODERNIZATION_ROADMAP.md) and [IMPLEMENTATION_DETAILS.md](./IMPLEMENTATION_DETAILS.md). For technology stack comparisons, see [ARCHITECTURE_COMPARISON.md](./ARCHITECTURE_COMPARISON.md).
+**Document Purpose:** This framework helps stakeholders make informed decisions about which modernization path to pursue. It focuses on business context, trade-offs, cost levels, and team requirements. For detailed technical implementation, see [MODERNIZATION_ROADMAP.md](./MODERNIZATION_ROADMAP.md) and [IMPLEMENTATION_DETAILS.md](./IMPLEMENTATION_DETAILS.md). For technology stack comparisons, see [ARCHITECTURE_COMPARISON.md](./ARCHITECTURE_COMPARISON.md).
 
 ---
 
@@ -37,7 +37,7 @@ This framework explains when to choose each of the six modernization phases (fro
 **Business Context:**
 - Organizations with existing GlassFish 4.1.1 infrastructure
 - Teams wanting to modernize incrementally
-- Projects with limited budget ($10k-30k) or time (2-3 weeks)
+- Projects with low cost tolerance or time (2-3 weeks)
 - Need for API-first capability while maintaining current UI
 
 **Technical Requirements:**
@@ -65,7 +65,7 @@ This framework explains when to choose each of the six modernization phases (fro
 
 **Benefits:**
 - Minimal infrastructure changes
-- Low risk, low cost
+- Low risk, low cost level
 - Quick time to market (2-3 weeks)
 - Enables future frontend modernization
 - Zero framework lock-in
@@ -107,7 +107,7 @@ This framework explains when to choose each of the six modernization phases (fro
 - Frontend team with React skills
 - React 18.2, TypeScript 5.0, Vite 5.0, React Router 7.9.5
 - CDN/deployment infrastructure (S3, CloudFront)
-- Budget for 6-8 weeks development
+- Level of effort: 6-8 weeks
 - *Optional: Phase 3.5 (PostgreSQL 15) available for database migration*
 
 **Ideal Team:**
@@ -174,7 +174,7 @@ This framework explains when to choose each of the six modernization phases (fro
 - Team with Spring Boot experience
 - PostgreSQL 15 or Aurora database (*Note: Phase 3.5 provides PostgreSQL 15 as standalone service*)
 - Cloud deployment infrastructure (ECS/EKS)
-- Budget for 10-12 weeks development
+- Level of effort: 10-12 weeks
 
 **Ideal Team:**
 - 3-5 developers
@@ -234,10 +234,10 @@ This framework explains when to choose each of the six modernization phases (fro
 - Desire for zero server management
 
 **Technical Requirements:**
-- AWS account and budget for Lambda execution
+- AWS account with Lambda access
 - Comfort with NoSQL (DynamoDB)
 - Familiarity with AWS services (Lambda, API Gateway, DynamoDB)
-- Budget for 8-10 weeks development
+- Level of effort: 8-10 weeks
 
 **Ideal Team:**
 - 2-4 developers
@@ -298,11 +298,11 @@ This framework explains when to choose each of the six modernization phases (fro
 - DevOps maturity and expertise available
 
 **Technical Requirements:**
-- Significant budget ($200k+)
+- High cost tolerance
 - Kubernetes infrastructure
 - DevOps team expertise
 - Monitoring and observability tools
-- Budget for 16+ weeks development
+- Level of effort: 16+ weeks
 
 **Ideal Team:**
 - 5+ developers across multiple teams
@@ -331,7 +331,7 @@ This framework explains when to choose each of the six modernization phases (fro
 **Limitations:**
 - High operational complexity
 - Distributed system challenges
-- Higher costs (infrastructure + team)
+- Higher cost level (infrastructure + team)
 - Requires DevOps maturity
 - Overkill for small applications
 - Longer development time (16+ weeks)
@@ -354,7 +354,7 @@ This framework explains when to choose each of the six modernization phases (fro
 | Criteria | Phase 2 | Phase 3 | Phase 4 | Phase 5 | Phase 6 |
 |----------|---------|---------|---------|---------|---------|
 | **Development Time** | 2-3 weeks | 6-8 weeks | 10-12 weeks | 8-10 weeks | 16+ weeks |
-| **Cost** | Low ($10-30k) | Medium ($40-80k) | Medium-High ($60-150k) | Low-Med ($20-60k) | High ($200k+) |
+| **Cost** | Low | Medium | Medium | Low | High |
 | **Risk** | Low | Medium | Medium-High | Medium | High |
 | **Complexity** | Low | Medium | Medium-High | Medium | Very High |
 | **Scalability** | Limited (vertical) | Medium | High | High | Very High |
@@ -375,15 +375,15 @@ This framework explains when to choose each of the six modernization phases (fro
 | **Concurrent Users** | 100-500 | 500-2000 | 5,000+ | 10,000+ | 20,000+ |
 | **Latency** | Medium | Medium | Low | Low | Very Low |
 
-### Cost Estimate (Monthly)
+### Cost Level (Relative)
 
-| Resource | Phase 2 | Phase 3 | Phase 4 | Phase 5 | Phase 6 |
-|----------|---------|---------|---------|---------|---------|
-| **Compute** | $50-200 | $50-200 | $30-100 | $5-50 | $150+ |
-| **Database** | $50 | $50 | $50-200 | $10-50 | $200-500 |
-| **CDN** | N/A | $10 | $10 | $10 | $10 |
-| **Other** | $40 | $40 | $85 | $25-90 | $220-280 |
-| **Total** | **$140-290** | **$150-300** | **$175-395** | **$50-200** | **$580-1000+** |
+| Phase | Cost Level |
+|-------|------------|
+| Phase 2 | Low |
+| Phase 3 | Medium |
+| Phase 4 | Medium |
+| Phase 5 | Low |
+| Phase 6 | High |
 
 ---
 
@@ -396,7 +396,7 @@ This framework explains when to choose each of the six modernization phases (fro
 Phase 1 (Baseline) → Phase 2 (REST API) → Phase 3 (SPA Frontend)
 ```
 **Timeline:** 10-14 weeks total  
-**Investment:** $50-140k  
+**Cost:** Low  
 **Risk:** Low  
 **Best for:** Traditional organizations wanting gradual modernization
 
@@ -405,7 +405,7 @@ Phase 1 (Baseline) → Phase 2 (REST API) → Phase 3 (SPA Frontend)
 Phase 1 (Baseline) → Phase 2 (REST API) → Phase 4 (Spring Boot)
 ```
 **Timeline:** 12-15 weeks total  
-**Investment:** $70-180k  
+**Cost:** Medium  
 **Risk:** Medium  
 **Best for:** Large enterprises standardizing on Spring
 
@@ -414,7 +414,7 @@ Phase 1 (Baseline) → Phase 2 (REST API) → Phase 4 (Spring Boot)
 Phase 1 (Baseline) → Phase 2 (REST API) → Phase 5 (Serverless)
 ```
 **Timeline:** 10-13 weeks total  
-**Investment:** $30-90k  
+**Cost:** Low  
 **Risk:** Medium  
 **Best for:** Startups and cloud-native organizations
 
@@ -423,7 +423,7 @@ Phase 1 (Baseline) → Phase 2 (REST API) → Phase 5 (Serverless)
 Phase 1 → Phase 2 → Phase 3 → Phase 4 → Phase 5 → Phase 6
 ```
 **Timeline:** 50+ weeks  
-**Investment:** $380k+  
+**Cost:** High  
 **Risk:** High  
 **Best for:** Demonstrating complete architecture evolution expertise
 
@@ -449,7 +449,7 @@ START
   ├─ Are you standardizing on Spring ecosystem?
   │  └─ YES → Complete Phase 2 first, then choose Phase 4 (Spring Boot)
   │
-  ├─ Do you have highly variable traffic and limited budget?
+   ├─ Do you have highly variable traffic and low cost tolerance?
   │  └─ YES → Complete Phase 2 first, then choose Phase 5 (Serverless)
   │
   ├─ Do you need maximum scalability with multiple teams?
@@ -487,7 +487,7 @@ START
 - Most complex architecture
 - Requires DevOps maturity
 - Distributed system challenges
-- Highest cost
+- Highest cost level
 
 ---
 
@@ -511,7 +511,7 @@ For any chosen phase, measure success by:
    - [ ] Documentation complete
 
 4. **Business Requirements**
-   - [ ] Within budget
+   - [ ] Within cost level
    - [ ] Delivered on time
    - [ ] User satisfaction met
 
@@ -527,7 +527,7 @@ For any chosen phase, measure success by:
 **Remember:**
 - Always start with Phase 2 (REST API) - it's the foundation
 - Choose based on your organization's specific needs, not just technology trends
-- Consider team expertise, budget, and risk tolerance
+- Consider team expertise, cost level, and risk tolerance
 - Modernization is a journey, not a destination
 - Start small, validate, and iterate
 

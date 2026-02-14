@@ -1,0 +1,74 @@
+{
+  "name": "Hotel Spring Boot Microservices",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "moby": true,
+      "installDockerBuildx": true
+    }
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "runArgs": [
+    "--network=hotel-shared-network",
+    "--add-host=host.docker.internal:host-gateway"
+  ],
+  "forwardPorts": [
+    8080,
+    8081,
+    8082,
+    5432
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "Spring Boot Services",
+      "onAutoForward": "notify"
+    },
+    "8081": {
+      "label": "Room Service",
+      "onAutoForward": "notify"
+    },
+    "8082": {
+      "label": "Reservation Service",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL Database",
+      "onAutoForward": "silent"
+    }
+  },
+  "containerEnv": {
+    "SPRING_PROFILES_ACTIVE": "local",
+    "SPRING_DATASOURCE_URL": "jdbc:postgresql://hotel-db-postgres:5432/hotel_reservation",
+    "SPRING_DATASOURCE_USERNAME": "postgres",
+    "SPRING_DATASOURCE_PASSWORD": "postgres"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vscjava.vscode-maven",
+        "vscjava.vscode-java-debug",
+        "vscjava.vscode-java-test",
+        "vmware.vscode-spring-boot",
+        "vmware.vscode-spring-boot-dashboard",
+        "vscjava.vscode-spring-boot-docs",
+        "vscjava.vscode-spring-initializr",
+        "redhat.vscode-xml",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "java.configuration.updateBuildConfiguration": "automatic",
+        "java.compile.nullAnalysis.mode": "automatic",
+        "maven.terminal.useJavaHome": true
+      }
+    }
+  },
+  "postCreateCommand": "bash -c 'sudo apt-get update && sudo apt-get install -y maven && java -version && mvn -version && echo \"✓ DevContainer ready!\" && echo \"To start services:\" && echo \"  Room Service: cd hotel-room-service && mvn spring-boot:run\" && echo \"  Reservation Service: cd hotel-reservation-service && mvn spring-boot:run\"'",
+  "postStartCommand": "echo 'Connected to hotel-shared-network. Ensure PostgreSQL is running: docker compose --profile db up -d hotel-db-postgres'"
+}

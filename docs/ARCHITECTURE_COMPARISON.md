@@ -299,18 +299,16 @@ graph LR
 | **CPU Usage** | Medium-High | Medium-High | Low (frontend only) | Medium | Low (on-demand) | Low-Medium |
 | **Bundle Size** | N/A | N/A | ~200KB (gzipped) | N/A | N/A | N/A |
 
-## Cost Analysis (Estimated Monthly)
+## Cost Level (Relative)
 
-| Resource | Phase 1: Legacy (hotel-monolith) | Phase 2: RESTful (hotel-api-rest) | Phase 3: SPA (hotel-ui-react) | Phase 4: Spring Boot | Phase 5: Serverless | Phase 6: Microservices |
-|----------|----------------|------------------|-------------|---------------------|---------------------|------------------------|
-| **Compute** | EC2: $50-200 | EC2: $50-200 | EC2: $50-200 (backend) | ECS: $30-100 | Lambda: $5-50 | EKS: $150+ |
-| **Storage** | EBS: $10 | EBS: $10 | S3: $1 (frontend) | EBS: $20 | S3: $1 | EBS: $50 |
-| **Database** | RDS: $50 | RDS: $50 | RDS: $50 (shared backend) | RDS: $50-200 | DynamoDB: $10-50 | RDS: $200-500 |
-| **CDN** | N/A | N/A | CloudFront: $10 (frontend) | CloudFront: $10 | CloudFront: $10 | CloudFront: $10 |
-| **API Gateway** | N/A | N/A | N/A | N/A | $5-50 | $20-100 |
-| **Load Balancer** | ELB: $20 | ELB: $20 | ALB: $25 (backend) | ALB: $25 | N/A | ALB: $50+ |
-| **Monitoring** | CloudWatch: $10 | CloudWatch: $10 | CloudWatch: $15 | CloudWatch: $30 | CloudWatch: $20 | CloudWatch + Prometheus: $100+ |
-| **Total Monthly** | **$140-290** | **$140-290** | **$150-300** | **$165-365** | **$50-200** | **$580-1000+** |
+| Phase | Primary Infrastructure | Cost Level |
+|-------|------------------------|------------|
+| Phase 1: Legacy | EC2 + RDS | Medium |
+| Phase 2: RESTful | EC2 + RDS | Medium |
+| Phase 3: SPA | EC2 + RDS + S3 + CloudFront | Medium |
+| Phase 4: Spring Boot | ECS + RDS + CloudFront | Medium |
+| Phase 5: Serverless | Lambda + DynamoDB + S3 + CloudFront | Low |
+| Phase 6: Microservices | EKS + RDS + CloudFront | High |
 
 ## Development Experience Comparison
 
@@ -351,7 +349,7 @@ Microservices:  ████████████████ Very Difficult 
 
 ### Recommended Paths by Scenario
 
-**Scenario 1: Limited Budget, Low Risk**
+**Scenario 1: Low Cost, Low Risk**
 ```
 Phase 1 (Baseline) → Phase 2 (RESTful API) → Phase 3 (SPA Frontend)
 ```

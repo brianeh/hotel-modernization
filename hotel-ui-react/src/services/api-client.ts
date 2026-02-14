@@ -1,15 +1,17 @@
 import type { Room } from "../types/room";
 import type { Reservation } from "../types/reservation";
 
-// Use relative URL for API calls to leverage Vite proxy in development
-// In development, the Vite proxy handles /api/* routes
-// In production, VITE_API_URL will be set to the production backend URL
-const API_BASE_URL = import.meta.env.PROD
-  ? import.meta.env.VITE_API_URL || ""
+// Use relative URLs in development so the Vite proxy can route requests.
+const ROOMS_API_BASE_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_ROOMS_API_URL || ""
+  : "";
+
+const RESERVATIONS_API_BASE_URL = import.meta.env.PROD
+  ? import.meta.env.VITE_RESERVATIONS_API_URL || ""
   : "";
 
 export async function getAllRooms(): Promise<Room[]> {
-  const response = await fetch(`${API_BASE_URL}/api/rooms`);
+  const response = await fetch(`${ROOMS_API_BASE_URL}/api/rooms`);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
@@ -21,7 +23,7 @@ export async function searchAvailableRooms(
   checkOut: string
 ): Promise<Room[]> {
   const response = await fetch(
-    `${API_BASE_URL}/api/reservations/search?checkIn=${checkIn}&checkOut=${checkOut}`
+    `${RESERVATIONS_API_BASE_URL}/api/reservations/search?checkIn=${checkIn}&checkOut=${checkOut}`
   );
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -32,7 +34,7 @@ export async function searchAvailableRooms(
 export async function createReservation(
   reservation: Reservation
 ): Promise<Reservation> {
-  const response = await fetch(`${API_BASE_URL}/api/reservations`, {
+  const response = await fetch(`${RESERVATIONS_API_BASE_URL}/api/reservations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -47,7 +49,7 @@ export async function createReservation(
 }
 
 export async function getRoomById(id: number): Promise<Room> {
-  const response = await fetch(`${API_BASE_URL}/api/rooms/${id}`);
+  const response = await fetch(`${ROOMS_API_BASE_URL}/api/rooms/${id}`);
   if (!response.ok) {
     if (response.status === 404) {
       throw new Error("Room not found");
@@ -58,7 +60,7 @@ export async function getRoomById(id: number): Promise<Room> {
 }
 
 export async function getAllReservations(): Promise<Reservation[]> {
-  const response = await fetch(`${API_BASE_URL}/api/reservations`);
+  const response = await fetch(`${RESERVATIONS_API_BASE_URL}/api/reservations`);
   if (!response.ok) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
@@ -66,7 +68,7 @@ export async function getAllReservations(): Promise<Reservation[]> {
 }
 
 export async function createRoom(room: Partial<Room>): Promise<Room> {
-  const response = await fetch(`${API_BASE_URL}/api/rooms`, {
+  const response = await fetch(`${ROOMS_API_BASE_URL}/api/rooms`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -83,7 +85,7 @@ export async function updateRoom(
   id: number,
   room: Partial<Room>
 ): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/rooms/${id}`, {
+  const response = await fetch(`${ROOMS_API_BASE_URL}/api/rooms/${id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -96,7 +98,7 @@ export async function updateRoom(
 }
 
 export async function deleteRoom(id: number): Promise<void> {
-  const response = await fetch(`${API_BASE_URL}/api/rooms/${id}`, {
+  const response = await fetch(`${ROOMS_API_BASE_URL}/api/rooms/${id}`, {
     method: "DELETE",
   });
   if (!response.ok && response.status !== 204) {

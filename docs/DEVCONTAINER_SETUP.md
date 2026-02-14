@@ -11,6 +11,7 @@ The monorepo structure includes:
 - `hotel-api-rest/` - Modern REST API backend
 - `hotel-ui-react/` - React frontend SPA
 - `hotel-db-postgres/` - Shared PostgreSQL database
+- `hotel-api-springboot/` - Spring Boot rooms and reservations services
 
 ---
 
@@ -104,7 +105,13 @@ docker compose --profile db up hotel-db-postgres
 docker compose --profile api up hotel-api-rest
 
 # React UI pointing at the REST API proxy target
-docker compose --profile ui up hotel-ui-react
+docker compose --profile ui-rest up hotel-ui-react-rest
+
+# React UI pointing at Spring Boot services
+docker compose --profile ui-springboot up hotel-ui-react-springboot
+
+# Spring Boot services
+docker compose --profile springboot up hotel-api-rooms hotel-api-reservations
 
 # Legacy monolith toolkit container
 docker compose --profile monolith up hotel-monolith
@@ -138,8 +145,20 @@ docker compose --profile all up
 #### `hotel-ui-react`
 - **Port**: `5173` (Vite dev server)
 - **Auto-start**: Runs `npm run dev` automatically
-- **Proxy**: Vite proxy in `vite.config.ts` targets `http://hotel-api-rest:8080/HotelReservation-war` (Docker Compose service name)
-- **Dependencies**: Waits for `hotel-api-rest` to be healthy
+- **Proxy**: Vite proxy in `vite.config.ts` routes `/api/rooms` and `/api/reservations` to backend services
+- **Dependencies**: `ui-rest` waits for `hotel-api-rest`, `ui-springboot` waits for `hotel-api-rooms` and `hotel-api-reservations`
+
+#### `hotel-api-rooms`
+- **Port**: `8081` (host) → `8080` (container)
+- **Runtime**: Spring Boot (Java 17)
+- **Health Check**: `/actuator/health`
+- **Database**: PostgreSQL via `hotel-db-postgres`
+
+#### `hotel-api-reservations`
+- **Port**: `8082` (host) → `8080` (container)
+- **Runtime**: Spring Boot (Java 17)
+- **Health Check**: `/actuator/health`
+- **Database**: PostgreSQL via `hotel-db-postgres`
 
 #### `hotel-monolith`
 - **Ports**: `8080` (HTTP), `4849` (Admin Console)
@@ -187,8 +206,11 @@ docker compose --profile db --profile api up
 docker compose exec hotel-api-rest bash
 ./deploy.sh
 
-# Start frontend
-docker compose --profile ui up hotel-ui-react
+# Start frontend (REST backend)
+docker compose --profile ui-rest up hotel-ui-react-rest
+
+# Or start frontend (Spring Boot backend)
+docker compose --profile db --profile springboot --profile ui-springboot up
 ```
 
 #### Database Administration
@@ -237,7 +259,8 @@ To stop individual services:
 docker compose stop hotel-db-postgres
 
 # Stop multiple specific services
-docker compose stop hotel-api-rest hotel-ui-react
+docker compose stop hotel-api-rest hotel-ui-react-rest
+docker compose stop hotel-api-rooms hotel-api-reservations hotel-ui-react-springboot
 
 # Stop and remove a specific service
 docker compose rm -f hotel-db-postgres
@@ -309,7 +332,8 @@ docker compose down --volumes
     }
   },
   "remoteEnv": {
-    "VITE_API_URL": "http://host.docker.internal:8080/HotelReservation-war"
+    "VITE_ROOMS_API_URL": "http://host.docker.internal:8081",
+    "VITE_RESERVATIONS_API_URL": "http://host.docker.internal:8082"
   }
 }
 ```
@@ -323,6 +347,22 @@ Both `hotel-monolith/.devcontainer/` and `hotel-api-rest/.devcontainer/` are con
 - MySQL 8.0 (for legacy compatibility)
 
 **Note**: These containers use MySQL internally, but the monorepo's shared database is Postgres.
+
+### Spring Boot DevContainer
+
+There is a dedicated Spring Boot DevContainer in `hotel-api-springboot/.devcontainer`. Open the `hotel-api-springboot/` folder in a new VS Code window and select **Dev Containers: Reopen in Container**.
+
+From that DevContainer, you can run the services locally:
+
+```bash
+cd rooms-service
+mvn spring-boot:run
+
+cd ../reservations-service
+mvn spring-boot:run
+```
+
+This DevContainer is configured to connect to the shared Docker network and Postgres service.
 
 ### Workflow with Separate DevContainers
 
@@ -379,6 +419,8 @@ The `host.docker.internal` allows the frontend container to access the host mach
 | **API Admin Console** | 4850 | http://localhost:4850 | API server admin |
 | **Monolith Admin Console** | 4849 | http://localhost:4849 | Monolith server admin |
 | **PostgreSQL** | 5432 | localhost:5432 | Shared database |
+| **Spring Boot Rooms** | 8081 | http://localhost:8081 | Rooms API |
+| **Spring Boot Reservations** | 8082 | http://localhost:8082 | Reservations API |
 
 **Note**: When using Docker Compose, only one service can bind to port 8080 at a time. The API and monolith use different admin ports (4850 vs 4849) to avoid conflicts.
 
@@ -397,15 +439,15 @@ The `host.docker.internal` allows the frontend container to access the host mach
 ### Issue: Frontend can't reach backend API
 
 **For Docker Compose:**
-- Verify `hotel-api-rest` is healthy: `docker compose ps`
-- Check API container logs: `docker compose logs hotel-api-rest`
-- Ensure API is deployed: `docker compose exec hotel-api-rest ./deploy.sh`
-- Verify network connectivity: `docker compose exec hotel-ui-react ping hotel-api-rest`
+- Verify backend service is healthy: `docker compose ps`
+- Check API container logs: `docker compose logs hotel-api-rest` or `docker compose logs hotel-api-rooms`
+- Ensure API is deployed (REST backend): `docker compose exec hotel-api-rest ./deploy.sh`
+- Verify network connectivity: `docker compose exec hotel-ui-react-rest ping hotel-api-rest`
 
 **For Separate DevContainers:**
-- Check the API URL in devcontainer config: `VITE_API_URL=http://host.docker.internal:8080/HotelReservation-war`
-- Verify backend is running on host port 8080
-- Test backend directly: `curl http://localhost:8080/HotelReservation-war/api/rooms`
+- Check the API URL in devcontainer config: `VITE_ROOMS_API_URL` and `VITE_RESERVATIONS_API_URL`
+- Verify backend is running on host ports 8081 and 8082
+- Test backend directly: `curl http://localhost:8081/api/rooms`
 
 ### Issue: Container name already in use
 

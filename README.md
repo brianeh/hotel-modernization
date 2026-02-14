@@ -16,12 +16,12 @@ hotel-modernization/
 ├── hotel-api-rest/             ✅ Phase 2: RESTful API Layer (Implemented)
 ├── hotel-ui-react/             ✅ Phase 3: React SPA Frontend (Implemented)
 ├── hotel-db-postgres/          ✅ Phase 3.5: PostgreSQL Database (Implemented)
-├── hotel-api-springboot/      📋 Phase 4: Spring Boot Backend (Planned - external repo)
+├── hotel-api-springboot/      ✅ Phase 4: Spring Boot Backend (Implemented)
 ├── hotel-api-serverless/      📋 Phase 5: Serverless Backend (Planned - external repo)
 └── hotel-api-microservices/   📋 Phase 6: Microservices Architecture (Planned - external repo)
 ```
 
-**Note:** Phases 4-6 are planned and will be implemented in separate repositories. See [MODERNIZATION_ROADMAP.md](./docs/MODERNIZATION_ROADMAP.md) for details.
+**Note:** Phases 5-6 are planned and will be implemented in separate repositories. Phase 4 is implemented here; see [hotel-api-springboot/README.md](hotel-api-springboot/README.md).
 
 ### Implemented Projects
 
@@ -32,6 +32,7 @@ hotel-modernization/
 - **hotel-api-rest** - Enhanced monolith with JAX-RS REST API layer (Jersey) for API-first development
 - **hotel-ui-react** - Modern React SPA frontend consuming REST API via Vite proxy, built with TypeScript and CSS Modules
 - **hotel-db-postgres** - Standalone PostgreSQL 15 database service for multi-phase use (migration from MySQL, shared across phases)
+- **hotel-api-springboot** - Spring Boot Rooms and Reservations services backed by PostgreSQL
 
 ---
 
@@ -54,7 +55,7 @@ hotel-modernization/
 | **Phase 2** | ✅ **Complete** | `hotel-api-rest` | RESTful API Layer | JAX-RS (Jersey) + Jackson + CDI + GlassFish 4.1.1 + MySQL 8.0 |
 | **Phase 3** | ✅ **Complete** | `hotel-ui-react` | React SPA Frontend | React 18.2 + TypeScript 5.0 + Vite 5.0 + React Router 7.9.5 |
 | **Phase 3.5** | ✅ **Complete** | `hotel-db-postgres` | PostgreSQL Database | PostgreSQL 15 (standalone service) |
-| **Phase 4** | 📋 Planned | - | Spring Boot Backend | Spring Boot + PostgreSQL |
+| **Phase 4** | ✅ **Complete** | `hotel-api-springboot` | Spring Boot Backend | Spring Boot + PostgreSQL |
 | **Phase 5** | 📋 Planned | - | Serverless Backend | AWS Lambda + DynamoDB |
 | **Phase 6** | 📋 Planned | - | Microservices | Quarkus + Kubernetes |
 
@@ -113,10 +114,10 @@ docker compose logs -f hotel-api-rest
 docker compose --profile api up -d
 
 # Start React frontend
-docker compose --profile ui up -d
+docker compose --profile ui-rest up -d
 
 # View logs
-docker compose logs -f hotel-ui-react
+docker compose logs -f hotel-ui-react-rest
 
 # Access: http://localhost:5173
 ```
@@ -150,6 +151,31 @@ docker compose exec hotel-db-postgres psql -U postgres -d hotel_reservation
 - Connection: `localhost:5432` (user: `postgres`, password: `postgres`, database: `hotel_reservation`)
 - Can be used alongside MySQL-based phases for migration testing
 
+### Phase 4: Spring Boot Backend (`hotel-api-springboot`)
+```bash
+# From monorepo root
+# Start Postgres + Spring Boot services
+docker compose --profile db --profile springboot up -d
+
+# Start React frontend with Spring Boot backend
+docker compose --profile db --profile springboot --profile ui-springboot up -d
+
+# View logs
+docker compose logs -f hotel-api-rooms
+docker compose logs -f hotel-api-reservations
+docker compose logs -f hotel-ui-react-springboot
+
+# Access: http://localhost:5173
+# Rooms API: http://localhost:8081/api/rooms
+# Reservations API: http://localhost:8082/api/reservations
+```
+
+**Implementation Details:**
+- Spring Boot services split by domain: rooms and reservations
+- PostgreSQL-backed persistence layer (Phase 3.5 database)
+- UI can switch between REST and Spring Boot backends via Compose profiles
+
+
 ### Starting Multiple Services
 
 ```bash
@@ -157,7 +183,7 @@ docker compose exec hotel-db-postgres psql -U postgres -d hotel_reservation
 docker compose --profile all up -d
 
 # Start specific combination (e.g., API + UI + Database)
-docker compose --profile api --profile ui --profile db up -d
+docker compose --profile api --profile ui-rest --profile db up -d
 
 # Stop all services
 docker compose --profile all down
@@ -201,7 +227,7 @@ Phase 3.5 (PostgreSQL) ✅ - hotel-db-postgres
 ├── Schema: Auto-initialized with migrations
 └── Usage: Shared across multiple phases (3.5, 4, 5, 6)
 
-Phase 4 (Spring Boot) Recommended Next
+Phase 4 (Spring Boot) ✅ - hotel-api-springboot
 ├── Frontend: React/Angular → CloudFront
 ├── Backend: Spring Boot REST API
 ├── Server: Embedded Tomcat
@@ -224,18 +250,18 @@ Phase 6 (Microservices)
 
 ## Architecture Comparison
 
-These comparisons call out trade-offs in cost, delivery complexity, operational ownership, and team skill alignment. Estimates assume a small-to-medium production footprint in a single AWS region, on‑demand pricing, modest traffic, and one non‑production environment. Costs exclude enterprise support and third‑party observability; complexity reflects build/deploy effort, runtime operations, and blast radius. Expect variance based on scale, traffic patterns, compliance needs, regional redundancy, and automation maturity.
+These comparisons call out trade-offs in delivery complexity, operational ownership, team skill alignment, and relative cost level. Complexity reflects build/deploy effort, runtime operations, and blast radius. Expect variance based on scale, traffic patterns, compliance needs, regional redundancy, and automation maturity.
 
-### Cost Estimate (Monthly)
+### Cost Level (Relative)
 
-| Phase | Infrastructure | Total Monthly |
-|-------|----------------|---------------|
-| Phase 1 | EC2 + RDS | $100-250 |
-| Phase 2 | EC2 + RDS | $100-250 |
-| Phase 3 | EC2 + RDS + S3 + CloudFront | $135-285 |
-| Phase 4 | ECS + RDS + CloudFront | $175-395 |
-| Phase 5 | Lambda + DynamoDB + S3 + CloudFront | $30-160 |
-| Phase 6 | EKS + RDS + CloudFront | $580-1380 |
+| Phase | Infrastructure | Cost Level |
+|-------|----------------|------------|
+| Phase 1 | EC2 + RDS | Medium |
+| Phase 2 | EC2 + RDS | Medium |
+| Phase 3 | EC2 + RDS + S3 + CloudFront | Medium |
+| Phase 4 | ECS + RDS + CloudFront | Medium |
+| Phase 5 | Lambda + DynamoDB + S3 + CloudFront | Low |
+| Phase 6 | EKS + RDS + CloudFront | High |
 
 ### Complexity Comparison
 
@@ -254,7 +280,7 @@ Phase 6: Microservices ████████████████
 
 Use this framework to pick the next phase that matches your constraints instead of chasing a generic “best” architecture. Start from where you are and move only as far as your drivers require.
 
-- **Primary drivers**: timeline, risk tolerance, budget, and team skill set
+- **Primary drivers**: timeline, risk tolerance, cost level, and team skill set
 - **Operational model**: SLAs/SLOs, on-call maturity, who owns runtime operations
 - **Data considerations**: migration complexity, downtime windows, backward compatibility
 - **Integration needs**: external systems, mobile apps, partner APIs, event streaming
@@ -279,25 +305,25 @@ Common guided paths:
 - Frontend/backend teams can work independently
 - Maintains backend unchanged
 - Incremental modernization
-- Budget: $40-80k, Timeline: 6-8 weeks
+- Level of effort: 6-8 weeks, Cost: Medium
 
 **Phase 4 (Spring Boot):**
 - Provides industry-standard framework
 - Good for teams that have Spring expertise
 - Long-term maintainability is priority
-- Budget: $60-150k, Timeline: 10-12 weeks
+- Level of effort: 8-10 weeks, Cost: Medium
 
 **Phase 5 (Serverless):**
 - Pay-per-use pricing
 - You have variable traffic patterns
 - You prefer managed services
-- Budget: $20-60k, Timeline: 8-10 weeks
+- Level of effort: 8-10 weeks, Cost: Low
 
 **Phase 6 (Microservices):**
 - You have massive scale requirements
 - Multiple independent teams
 - DevOps maturity available
-- Budget: $200k+, Timeline: 16+ weeks
+- Level of effort: 16+ weeks, Cost: High
 
 ### Reference
 
@@ -317,7 +343,8 @@ docker compose --profile all up -d
 
 # Start specific services
 docker compose --profile api up -d      # REST API backend
-docker compose --profile ui up -d        # React frontend
+docker compose --profile ui-rest up -d   # React frontend (REST backend)
+docker compose --profile ui-springboot up -d  # React frontend (Spring Boot backend)
 docker compose --profile db up -d        # PostgreSQL database
 docker compose --profile monolith up -d  # Legacy monolith
 
@@ -336,6 +363,8 @@ Once services are running:
 - **API Admin Console**: http://localhost:4850
 - **Monolith Admin Console**: http://localhost:4849
 - **PostgreSQL**: localhost:5432
+- **Spring Boot Rooms API**: http://localhost:8081/api/rooms
+- **Spring Boot Reservations API**: http://localhost:8082/api/reservations
 
 ### Development Workflow
 
@@ -371,6 +400,12 @@ This portfolio demonstrates:
 ## Contributing
 
 This is a portfolio/demonstration repository. All contributions to improve documentation, examples, or add new modernization strategies are welcome.
+
+---
+
+## Acknowledgments
+
+This project was created with the assistance of **AI tools** (including Cursor and similar coding assistants). AI was used to help with implementation, refactoring, and documentation. All design decisions and final code remain under human direction.
 
 ---
 

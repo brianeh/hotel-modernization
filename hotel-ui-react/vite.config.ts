@@ -8,8 +8,13 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0", // Allow access from outside container
     proxy: {
-      "/api": {
-        target: process.env.VITE_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
+      "/api/rooms": {
+        target: process.env.VITE_ROOMS_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, "/api"),
+      },
+      "/api/reservations": {
+        target: process.env.VITE_RESERVATIONS_API_URL || "http://hotel-api-rest:8080/HotelReservation-war",
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
